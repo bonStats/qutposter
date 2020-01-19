@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<!--
+Font-awesome icons ie github or twitter
+-->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/brands.css" integrity="sha384-n9+6/aSqa9lBidZMRCQHTHKJscPq6NW4pCQBiMmHdUCvPN8ZOg2zJJTkC7WIezWv" crossorigin="anonymous">
+
+<!--
+Google fonts api stuff
+-->
+<link href='https://fonts.googleapis.com/css?family=times, serif; font-size:30pt;' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css?family=times, serif; font-size:80pt;' rel='stylesheet'>
+
+
+
+<title>Delayed-acceptance sequential Monte Carlo</title>
+
+
+
+
+
+<style>
+@page {
+size: 33.11in 46.81in;
+margin: 0;
+padding: 0;
+}
+body {
+margin: 0;
+font-size: 45px;
+width: 33.11in;
+height: 46.81in;
+padding: 0;
+text-align: justify;
+font-family: times, serif; font-size:30pt;;
+}
+.poster_wrap {
+width: 33.11in;
+height: 46.81in;
+padding: 0cm;
+}
+.title_container {
+width: 33.11in;
+height: calc(46.81in * 0.15);
+overflow: hidden;
+background-color: #006e90;
+border: 0 solid #9CC5CA;
+}
+.logo_left {
+float: left;
+width: 10%;
+height: 100%;
+background-color: #006e90;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.logo_right {
+float: right;
+width: 10%;
+height: 100%;
+background-color: #006e90;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.poster_title {
+text-align: center;
+position: relative;
+float: left;
+width: 80%;
+height: 100%;
+color: #FFFFFF;
+top: 50%;
+transform: translateY(-50%);
+-webkit-transform: translateY(-50%);
+}
+#title {
+font-family: times, serif; font-size:80pt;;
+}
+/* unvisited link */
+a:link {
+color: #cc0000;
+}
+.mybreak {
+  break-before: column;
+}
+/* visited link */
+a:visited {
+color: #cc0000;
+}
+
+/* mouse over link */
+a:hover {
+color: #cc0000;
+}
+
+/* selected link */
+a:active {
+color: #cc0000;
+}
+.poster_body {
+-webkit-column-count: 3; /* Chrome, Safari, Opera */
+-moz-column-count: 3; /* Firefox */
+column-count: 3;
+-webkit-column-fill: auto;
+-moz-column-fill: auto;
+column-fill: auto;
+-webkit-column-rule-width: 1mm;
+-moz-column-rule-width: 1mm;
+column-rule-width: 1mm;
+-webkit-column-rule-style: dashed;
+-moz-column-rule-style: dashed;
+column-rule-style: dashed;
+-webkit-column-rule-color: #006e90;
+-moz-column-rule-color: #006e90;
+column-rule-color: #006e90;
+column-gap: 1em;
+padding-left: 0.5em;
+padding-right: 0.5em;
+height: 100%;
+color: #000000
+background-color: #ffffff;
+}
+.poster_title h1 {
+font-size: 75pt;
+margin: 0;
+border: 0;
+font-weight: normal;
+}
+.poster_body_wrap{
+width: calc(33.11in + 0 + 0);
+height: calc(46.81in * 0.83);
+padding-top: calc(46.81in * 0.005);
+padding-bottom: calc(46.81in * 0.01);
+background-color: #ffffff;
+}
+.poster_title h3 {
+color: #9CC5CA;
+font-size: 50pt;
+margin: 0;
+border: 0;
+font-weight: normal;
+}
+.poster_title h3 > sup {
+  font-size: 35pt;
+  margin-left: 0.02em;
+}
+.poster_title h5 {
+color: #FFFFFF;
+font-size: 35pt;
+margin: 0;
+border: 0;
+font-weight: normal;
+}
+img {
+margin-top: 2cm;
+margin-bottom: 0;
+}
+.section {
+  padding: 0.2em;
+}
+.poster_body h1 {
+text-align: center;
+color: #FFFFFF;
+font-size: 55pt;
+border: 2mm solid #006e90;
+background-color: #006e90;
+border-radius: 4mm 0mm;
+margin-top: 2mm;
+margin-bottom: 2mm;
+font-weight: normal;
+}
+.poster_body h2 {
+color: #000000;
+font-size: 35pt;
+padding-left: 4mm;
+font-weight: normal;
+}
+.span {
+width: 200%;
+}
+/* center align leaflet map,
+from https://stackoverflow.com/questions/52112119/center-leaflet-in-a-rmarkdown-document */
+.html-widget {
+margin: auto;
+position: sticky;
+margin-top: 2cm;
+margin-bottom: 2cm;
+}
+.leaflet.html-widget.html-widget-static-bound.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom {
+position: sticky;
+width: 100%;
+}
+pre.sourceCode.r {
+background-color: #dddddd40;
+border-radius: 4mm;
+padding: 4mm;
+width: 75%;
+/* align-items: center; */
+margin: auto;
+padding-left: 2cm;
+}
+code.sourceCode.r{
+background-color: transparent;
+font-size: 20pt;
+border-radius: 2mm;
+}
+.caption {
+font-size: 25pt;
+}
+.table caption {
+font-size: 25pt;
+padding-bottom: 3mm;
+
+}
+code {
+font-size: 1em;
+font-family: monospace;
+background-color: #9CC5CA24;
+color: #006e90;
+padding: 1.2mm;
+border-radius: 2mm;
+}
+.poster_title code {
+font-size: 1em;
+}
+table {
+font-size: 40px;
+margin: auto;
+border-top: 3px solid #666;
+border-bottom: 3px solid #666;
+}
+table thead th {
+border-bottom: 3px solid #ddd;
+}
+td {
+padding: 8px;
+}
+th {
+padding: 15px;
+}
+caption {
+margin-bottom: 10px;
+}
+.poster_body p {
+margin-right: 4mm;
+margin-left: 4mm;
+margin-top: 6mm;
+margin-bottom: 10mm;
+}
+.poster_body ol {
+margin-right: 4mm;
+margin-left: 4mm;
+}
+#ul {
+margin-right: 4mm;
+margin-left: 4mm;
+}
+.references p {
+font-size: 20pt;
+}
+.orcid img {
+  width: 1em;
+}
+</style>
+</head>
+<body>
+
+
+<div class="poster_wrap">
+<div class="title_container">
+<!-- Left Logo  -->
+<div class="logo_left">
+<img src= 'imgs/QUT_SQUARE_RGB_REV.png' style="width: 80%">
+</div>
+<!-- Poster Title -->
+<div class= "poster_title">
+<h1 id="title">Delayed-acceptance sequential Monte Carlo</h1>
+<h3 id="author">Joshua J Bon<sup>1,2</sup>, Anthony Lee<sup>3</sup>, Christopher Drovandi<sup>1,2</sup></h3><br>
+<h5 id="affiliation"><sup>1</sup> School of Mathematical Sciences, Queensland University of Technology<br> <sup>2</sup> ARC Centre of Excellence for Mathematical and Statistical Frontiers (ACEMS)<br> <sup>3</sup> School of Mathematics, University of Bristol</h5>
+</div>
+<!-- Right Logo  -->
+<div class="logo_right">
+<img src=imgs/acems-logo-with-text-150.png style="width: 80%">
+</div>
+</div>
+
+<div class='poster_body_wrap'>
+<div class='poster_body'>
+<style>
+.title_container {
+height: calc(46.81in * 0.11);
+}
+.logo_left {
+width: 10%;
+}
+.logo_right {
+float: right;
+width: 20%;
+}
+.poster_title {
+width: 70%;
+}
+ul {
+text-align: left;
+margin-top: 0.3cm;
+margin-bottom: 0.3cm;
+}
+ol {
+text-align: left;
+margin-top: 0.3cm;
+margin-bottom: 0.3cm;
+}
+li {
+padding: 0.1cm;
+}
+img {
+margin-top: 0.1cm;
+margin-bottom: 0;
+}
+h2 {
+  margin-top: 0cm;
+  margin-bottom: 0.1cm;
+  font-style: italic;
+}
+</style>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<ul>
+<li>Delayed-acceptance (<span class="citation">Christen and Fox (2005)</span>, DA) can reduce computational effort for expensive likelihoods within Metropolis-Hastings algorithm (MH).</li>
+<li>A surrogate approximates the expensive likelihood.</li>
+<li>Acceptance of proposals are delayed until they passed the surrogate likelihood.</li>
+<li>Delayed-acceptance reduces the cost of MH whilst preserving the invariant distribution.</li>
+</ul>
+<div id="objectives" class="section level2">
+<h2>Objectives</h2>
+<ol style="list-style-type: decimal">
+<li>Incorporate DA into sequential Monte Carlo.</li>
+<li>Tune surrogate likelihood using particles.</li>
+<li>Control the computational cost of DA-SMC.</li>
+</ol>
+</div>
+</div>
+<div id="sequential-monte-carlo" class="section level1">
+<h1>Sequential Monte Carlo</h1>
+<ul>
+<li>Choose a schedule to connect a tractable starting distribution <span class="math inline">\(p_{0}(\boldsymbol{\theta})\)</span> to the posterior <span class="math inline">\(p_{T}(\boldsymbol{\theta}) = p(\boldsymbol{\theta}~\vert~\boldsymbol{y})\)</span>, e.g.
+<span class="math display">\[\begin{aligned}
+&amp;p_{t}(\boldsymbol{\theta}) = p_{0}(\boldsymbol{\theta})^{1-\gamma_{t}}p(\boldsymbol{\theta}~\vert~\boldsymbol{y})^{\gamma_{t}} \\ &amp; 0 = \gamma_{0} &lt; \gamma_{1} &lt; \cdots &lt; \gamma_{T} = 1
+\end{aligned}\]</span></li>
+<li>Draw a sample from starting distribution <span class="math inline">\(p_{0}(\boldsymbol{\theta})\)</span> particles, then iterate reweight, resample, and refresh steps as in Figure 1.</li>
+</ul>
+</div>
+<div id="delayed-acceptance" class="section level1">
+<h1>Delayed-acceptance</h1>
+<p>SMC can use MH to perform the refresh. For simplicity consider Metropolis algorithm (symmetric proposal).</p>
+<p>Let <span class="math inline">\(\tilde{p}_{t}(\boldsymbol{\theta}_{t}~\vert~\boldsymbol{y})\)</span> be a cheap approximation of the full posterior <span class="math inline">\(p_{t}(\boldsymbol{\theta}_{t}~\vert~\boldsymbol{y})\)</span>.</p>
+<ol style="list-style-type: decimal">
+<li>From <span class="math inline">\(\boldsymbol{\theta}_{t-1}\)</span> propose new <span class="math inline">\(\boldsymbol{\theta}^{\prime} \sim k(\boldsymbol{\theta}~\vert~\boldsymbol{\theta}_{t-1})\)</span>.</li>
+<li>Calculate surrogate acceptance probability
+<span class="math display">\[\alpha^{1} = \min\left(1,\frac{\tilde{p}_{t}(\boldsymbol{\theta}^{\prime}~\vert~\boldsymbol{y})}{\tilde{p}_{t}(\boldsymbol{\theta}_{t-1}~\vert~\boldsymbol{y})} \right)\]</span>
+and provisionally accept with probability <span class="math inline">\(\alpha^{1}.\)</span>
+<ul>
+<li>If rejected: <span class="math inline">\(\boldsymbol{\theta}_{t} \leftarrow \boldsymbol{\theta}_{t-1}\)</span>.</li>
+</ul></li>
+<li>If provisionally accepted, calculate
+<span class="math display">\[\alpha^{2} = \min\left(1,\frac{\tilde{p}(\boldsymbol{\theta}_{t-1}~\vert~\boldsymbol{y})}{\tilde{p}(\boldsymbol{\theta}^{\prime}~\vert~\boldsymbol{y})} \frac{p(\boldsymbol{\theta}^{\prime}~\vert~\boldsymbol{y})}{p(\boldsymbol{\theta}_{t-1}~\vert~\boldsymbol{y})}  \right)\]</span>
+and accept with probability <span class="math inline">\(\alpha^{2}\)</span>.
+<ul>
+<li>If accepted: <span class="math inline">\(\boldsymbol{\theta}_{t} \leftarrow \boldsymbol{\theta}^{\prime}\)</span>.</li>
+<li>If rejected: <span class="math inline">\(\boldsymbol{\theta}_{t} \leftarrow \boldsymbol{\theta}_{t-1}\)</span>.
+<br></li>
+</ul></li>
+</ol>
+</div>
+<div id="surrogate-tuning" class="section level1">
+<h1>Surrogate tuning</h1>
+<ul>
+<li>Correct for differences in surrogate and full likelihood with tuning using SMC particles.</li>
+<li>Record every location (and value) where the expensive likelihood has been evaluated (cache with a hash function).</li>
+</ul>
+<p>At each SMC iteration we can minimise a distance (or discrepancy) to find <span class="math inline">\(\boldsymbol{\xi}^{\star}\)</span>, the optimal transformation, with
+<span class="math display">\[\min_{\boldsymbol{\xi}} \sum_{\boldsymbol{\theta} \in H(L)}d\left[ L(\boldsymbol{y}~\vert~\boldsymbol{\theta}), \tilde{L}(\boldsymbol{y}~\vert~T_{\boldsymbol{\xi}}(\boldsymbol{\theta}))\right]
+\]</span></p>
+<ul>
+<li><span class="math inline">\(L(\boldsymbol{y}~\vert~\boldsymbol{\theta})\)</span> and <span class="math inline">\(\tilde{L}(\boldsymbol{y}~\vert~\boldsymbol{\theta})\)</span> are full approximate likelihoods.</li>
+<li><span class="math inline">\(T_{\boldsymbol{\xi}}\)</span> is a pre-specified transformation.</li>
+</ul>
+<p>The expensive likelihood does not need to be evaluated since we use the cache <span class="math inline">\(H(L)\)</span>. In fact, since <span class="math inline">\(H(L)\)</span> grows each iteration, we can use a subset of values.</p>
+</div>
+<div id="optimal-computation-time" class="section level1">
+<h1>Optimal computation time</h1>
+<p>DA MH is most efficient when big steps are taken with lots of rejections, but a few big accepted jumps. We characterise this as an optimisation problem.</p>
+<p><span class="math display">\[\min_{k \in \mathbb{Z}^{+},\boldsymbol{\phi} \in \Phi}~ C(k, \boldsymbol{\phi}) \quad\text{s.t.}\quad D(k,\boldsymbol{\phi}) \geq d
+\]</span></p>
+<ul>
+<li>k is number of MCMC iterations.</li>
+<li><span class="math inline">\(\boldsymbol{\phi}\)</span> is tuning parameters of proposal kernel.</li>
+<li><span class="math inline">\(C(k, \boldsymbol{\phi})\)</span> is cost of <span class="math inline">\(k\)</span> MCMC iterations.</li>
+<li><span class="math inline">\(D(k,\boldsymbol{\phi})\)</span> is a diversification condition, to ensure the particles are sufficiently mutated after resampling.</li>
+</ul>
+<p>In DA-MH, the cost is
+<span class="math display">\[C(k,\boldsymbol{\phi}) = k(\tilde{L}_{C} +  \alpha^{1}(\boldsymbol{\phi})L_{C})\]</span> A good diversification condition can be the expected squared jumping distance (ESJD) <span class="citation">(Pasarica and Gelman 2010)</span>:
+<span class="math display">\[\text{median}\left\{\sum_{i=1}^{k}J_{i}(\boldsymbol{\phi})\right\} &gt; D\]</span>
+where <span class="math inline">\(J_{i}\)</span> is the ESJD for particle <span class="math inline">\(i\)</span>.</p>
+</div>
+<div id="approximate-annealing" class="section level1">
+<h1>Approximate annealing</h1>
+<p>Another way to increase the speed is to anneal to the approximate posterior first. Instead of moving from prior to posterior, we move from prior to approximate posterior, then to full posterior.
+<span class="math display">\[\tilde{p}_{t}(\boldsymbol{\theta}) = p_{0}(\boldsymbol{\theta})^{1-\gamma_{t}}\tilde{p}(\boldsymbol{\theta}~\vert~\boldsymbol{y})^{\gamma_{t}}, \quad 0 = \gamma_{0} &lt; \cdots &lt; \gamma_{S} = 1\]</span>
+followed by (using <span class="math inline">\(\tilde{p}_{S}(\boldsymbol{\theta}~\vert~\boldsymbol{y})\)</span> from first SMC run)
+<span class="math display">\[p_{t}(\boldsymbol{\theta}) = \tilde{p}_{S}(\boldsymbol{\theta}~\vert~\boldsymbol{y})^{1-\zeta_{t}}p(\boldsymbol{\theta}~\vert~\boldsymbol{y})^{\zeta_{t}}, \quad 0 = \zeta_{0} &lt; \cdots &lt; \zeta_{T} = 1
+\]</span>
+Some care is needed to ensure the approximate posterior has heavier tails than the full posterior.</p>
+</div>
+<div id="simulation" class="section level1">
+<h1>Simulation</h1>
+<p>Simple test of DA-SMC framework using 2000 particles for linear regression.</p>
+<ul>
+<li>Likelihood: Normal or t-distribution with artificial delay.</li>
+<li>Surrogate model: Biased normal.</li>
+<li>Proposal: Adaptive multivariate normal.</li>
+<li>Surrogate tuning: Least-squares on <span class="math inline">\(\log L\)</span> with <span class="math inline">\(T_{\boldsymbol{\eta}}\)</span> univariate shift and scale.</li>
+<li>Full to surrogate cost ratios: <span class="math inline">\(L_{C} / \tilde{L}_{C} \in \{10^2,10^3,10^4,10^5\}\)</span></li>
+<li>Computation time optimisation: Approximation of ESJD and costs using pilot run over grid on proposal step-size.</li>
+<li>ESJD Model, to estimate <span class="math inline">\(k\)</span> for diversification to be met;
+<ul>
+<li>Bootstrap using pilot run draws of ESJD, or</li>
+<li>Assume ESJD follows Gamma distribution estimated from pilot run.</li>
+</ul></li>
+</ul>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<ul>
+<li>Longest run time reduction 10 days to 1.5 days with approximate annealing and DA.</li>
+<li>Mean squared error was near-identical for all methods.</li>
+<li>Pilot median method works well for standard MH in SMC <span class="citation">(Salomone et al. 2018)</span>.</li>
+<li>Approximations to optimal computation time problem for <em>plain</em> MH correspond to choices used in the literature.</li>
+</ul>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<div id="acknowledgements" class="references">
+<p>Poster made with <code>posterdown</code> <span class="citation">(Thorne 2019)</span>.</p>
+</div>
+<div id="refs" class="references">
+<div id="ref-christen2005markov">
+<p>Christen, J Andrés, and Colin Fox. 2005. “Markov Chain Monte Carlo Using an Approximation.” <em>Journal of Computational and Graphical Statistics</em> 14 (4): 795–810.</p>
+</div>
+<div id="ref-pasarica2010adaptively">
+<p>Pasarica, Cristian, and Andrew Gelman. 2010. “Adaptively Scaling the Metropolis Algorithm Using Expected Squared Jumped Distance.” <em>Statistica Sinica</em> 20 (1): 343–64.</p>
+</div>
+<div id="ref-salomone2018unbiased">
+<p>Salomone, Robert, Leah F South, Christopher C Drovandi, and Dirk P Kroese. 2018. “Unbiased and Consistent Nested Sampling via Sequential Monte Carlo.” <em>arXiv Preprint arXiv:1805.03924</em>. <a href="https://arxiv.org/abs/1805.03924">https://arxiv.org/abs/1805.03924</a>.</p>
+</div>
+<div id="ref-R-posterdown">
+<p>Thorne, Brent. 2019. <em>Posterdown: Generate PDF Conference Posters Using R Markdown</em>. <a href="https://CRAN.R-project.org/package=posterdown">https://CRAN.R-project.org/package=posterdown</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+var script = document.createElement("script");
+script.type = "text/javascript";
+var src = "true";
+if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+if (location.protocol !== "file:" && /^https?:/.test(src))
+src = src.replace(/^https?:/, '');
+script.src = src;
+document.getElementsByTagName("head")[0].appendChild(script);
+})();
+</script>
+
+
+</body>
+</html>

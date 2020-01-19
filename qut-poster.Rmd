@@ -1,0 +1,219 @@
+---
+title: Delayed-acceptance sequential Monte Carlo
+author:
+  - name: Joshua J Bon
+    affil: '1,2'
+  - name: Anthony Lee
+    affil: 3
+  - name: Christopher Drovandi
+    affil: '1,2'
+affiliation:
+  - num: 1
+    address: School of Mathematical Sciences, Queensland University of Technology
+  - num: 2
+    address: ARC Centre of Excellence for Mathematical and Statistical Frontiers (ACEMS)
+  - num: 3
+    address: School of Mathematics, University of Bristol
+column_numbers: 3
+logoright_name: imgs/acems-logo-with-text-150.png
+logoright_width: '10in'
+logoleft_name: imgs/QUT_SQUARE_RGB_REV.png
+primary_colour: "#006e90"
+secondary_colour: "#9CC5CA"
+accent_colout: "#eff8e2"
+poster_height: '46.81in'
+poster_width: '33.11in'
+font_family: 'times, serif; font-size:30pt;'
+titletext_fontfamily: 'times, serif; font-size:80pt;'
+sectitle_textsize: '55pt'
+sectitle2_textsize: '35pt'
+output: 
+  posterdown::posterdown_html:
+    self_contained: false
+bibliography: poster.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(RColorBrewer)
+library(kableExtra)
+
+capitalize <- function(string) {
+  substr(string, 1, 1) <- toupper(substr(string, 1, 1))
+  string
+}
+
+attach_name <- function(string, name){
+  paste(name, "=", string)
+}
+
+flabeller <- labeller(likelihood = function(s) attach_name(s, "Likelihood"),
+                      bss_model = function(s) attach_name(s, "Tuning"))
+
+scientific_10 <- function(x) {
+  ifelse(x > 1,
+         parse(text=gsub("e\\+", " %*% 10^", scales::scientific_format()(x))),
+         parse(text=gsub("e", " %*% 10^", scales::scientific_format()(x)))
+  )
+  
+}
+
+knitr::opts_chunk$set(cache = T)
+
+```
+
+<style>
+.title_container {
+height: calc(46.81in * 0.11);
+}
+.logo_left {
+width: 10%;
+}
+.logo_right {
+float: right;
+width: 20%;
+}
+.poster_title {
+width: 70%;
+}
+ul {
+text-align: left;
+margin-top: 0.3cm;
+margin-bottom: 0.3cm;
+}
+ol {
+text-align: left;
+margin-top: 0.3cm;
+margin-bottom: 0.3cm;
+}
+li {
+padding: 0.1cm;
+}
+img {
+margin-top: 0.1cm;
+margin-bottom: 0;
+}
+h2 {
+  margin-top: 0cm;
+  margin-bottom: 0.1cm;
+  font-style: italic;
+}
+</style>
+
+# Introduction
+
+- Delayed-acceptance (@christen2005markov, DA) can reduce computational effort for expensive likelihoods within Metropolis-Hastings algorithm (MH). 
+- A surrogate approximates the expensive likelihood.
+- Acceptance of proposals are delayed until they passed the surrogate likelihood. 
+- Delayed-acceptance reduces the cost of MH whilst preserving the invariant distribution.
+
+## Objectives
+
+1. Incorporate DA into sequential Monte Carlo. 
+2. Tune surrogate likelihood using particles.
+3. Control the computational cost of DA-SMC.
+
+# Sequential Monte Carlo
+
+- Choose a schedule to connect a tractable starting distribution $p_{0}(\boldsymbol{\theta})$ to the posterior $p_{T}(\boldsymbol{\theta}) = p(\boldsymbol{\theta}~\vert~\boldsymbol{y})$, e.g.
+$$\begin{aligned}
+&p_{t}(\boldsymbol{\theta}) = p_{0}(\boldsymbol{\theta})^{1-\gamma_{t}}p(\boldsymbol{\theta}~\vert~\boldsymbol{y})^{\gamma_{t}} \\ & 0 = \gamma_{0} < \gamma_{1} < \cdots < \gamma_{T} = 1
+\end{aligned}$$
+- Draw a sample from starting distribution $p_{0}(\boldsymbol{\theta})$ particles, then iterate reweight, resample, and refresh steps as in Figure 1.
+
+
+# Delayed-acceptance
+
+SMC can use MH to perform the refresh. For simplicity consider Metropolis algorithm (symmetric proposal).
+
+Let $\tilde{p}_{t}(\boldsymbol{\theta}_{t}~\vert~\boldsymbol{y})$ be a cheap approximation of the full posterior $p_{t}(\boldsymbol{\theta}_{t}~\vert~\boldsymbol{y})$.
+
+1. From $\boldsymbol{\theta}_{t-1}$ propose new $\boldsymbol{\theta}^{\prime} \sim k(\boldsymbol{\theta}~\vert~\boldsymbol{\theta}_{t-1})$. 
+2. Calculate surrogate acceptance probability
+$$\alpha^{1} = \min\left(1,\frac{\tilde{p}_{t}(\boldsymbol{\theta}^{\prime}~\vert~\boldsymbol{y})}{\tilde{p}_{t}(\boldsymbol{\theta}_{t-1}~\vert~\boldsymbol{y})} \right)$$
+and provisionally accept with probability $\alpha^{1}.$ 
+    - If rejected: $\boldsymbol{\theta}_{t} \leftarrow \boldsymbol{\theta}_{t-1}$.
+3. If provisionally accepted, calculate 
+   $$\alpha^{2} = \min\left(1,\frac{\tilde{p}(\boldsymbol{\theta}_{t-1}~\vert~\boldsymbol{y})}{\tilde{p}(\boldsymbol{\theta}^{\prime}~\vert~\boldsymbol{y})} \frac{p(\boldsymbol{\theta}^{\prime}~\vert~\boldsymbol{y})}{p(\boldsymbol{\theta}_{t-1}~\vert~\boldsymbol{y})}  \right)$$
+and accept with probability $\alpha^{2}$.
+    - If accepted: $\boldsymbol{\theta}_{t} \leftarrow \boldsymbol{\theta}^{\prime}$.
+    - If rejected: $\boldsymbol{\theta}_{t} \leftarrow \boldsymbol{\theta}_{t-1}$.
+<br>
+
+# Surrogate tuning
+
+- Correct for differences in surrogate and full likelihood with tuning using SMC particles.
+- Record every location (and value) where the expensive likelihood has been evaluated (cache with a hash function).
+
+At each SMC iteration we can minimise a distance (or discrepancy) to find $\boldsymbol{\xi}^{\star}$, the optimal transformation, with
+$$\min_{\boldsymbol{\xi}} \sum_{\boldsymbol{\theta} \in H(L)}d\left[ L(\boldsymbol{y}~\vert~\boldsymbol{\theta}), \tilde{L}(\boldsymbol{y}~\vert~T_{\boldsymbol{\xi}}(\boldsymbol{\theta}))\right]
+$$
+
+- $L(\boldsymbol{y}~\vert~\boldsymbol{\theta})$ and $\tilde{L}(\boldsymbol{y}~\vert~\boldsymbol{\theta})$ are full approximate likelihoods.
+- $T_{\boldsymbol{\xi}}$ is a pre-specified transformation.
+
+The expensive likelihood does not need to be evaluated since we use the cache $H(L)$. In fact, since $H(L)$ grows each iteration, we can use a subset of values.
+
+
+# Optimal computation time 
+
+DA MH is most efficient when big steps are taken with lots of rejections, but a few big accepted jumps. We characterise this as an optimisation problem.
+
+$$\min_{k \in \mathbb{Z}^{+},\boldsymbol{\phi} \in \Phi}~ C(k, \boldsymbol{\phi}) \quad\text{s.t.}\quad D(k,\boldsymbol{\phi}) \geq d
+$$
+
+- k is number of MCMC iterations.
+- $\boldsymbol{\phi}$ is tuning parameters of proposal kernel.
+- $C(k, \boldsymbol{\phi})$ is cost of $k$ MCMC iterations.
+- $D(k,\boldsymbol{\phi})$ is a diversification condition, to ensure the particles are sufficiently mutated after resampling.
+
+In DA-MH, the cost is 
+$$C(k,\boldsymbol{\phi}) = k(\tilde{L}_{C} +  \alpha^{1}(\boldsymbol{\phi})L_{C})$$ A good diversification condition can be the expected squared jumping distance (ESJD) [@pasarica2010adaptively]:
+$$\text{median}\left\{\sum_{i=1}^{k}J_{i}(\boldsymbol{\phi})\right\} > D$$
+where $J_{i}$ is the ESJD for particle $i$.
+
+# Approximate annealing
+Another way to increase the speed is to anneal to the approximate posterior first. Instead of moving from prior to posterior, we move from prior to approximate posterior, then to full posterior.
+$$\tilde{p}_{t}(\boldsymbol{\theta}) = p_{0}(\boldsymbol{\theta})^{1-\gamma_{t}}\tilde{p}(\boldsymbol{\theta}~\vert~\boldsymbol{y})^{\gamma_{t}}, \quad 0 = \gamma_{0} < \cdots < \gamma_{S} = 1$$
+followed by (using $\tilde{p}_{S}(\boldsymbol{\theta}~\vert~\boldsymbol{y})$ from first SMC run)
+$$p_{t}(\boldsymbol{\theta}) = \tilde{p}_{S}(\boldsymbol{\theta}~\vert~\boldsymbol{y})^{1-\zeta_{t}}p(\boldsymbol{\theta}~\vert~\boldsymbol{y})^{\zeta_{t}}, \quad 0 = \zeta_{0} < \cdots < \zeta_{T} = 1
+$$
+Some care is needed to ensure the approximate posterior has heavier tails than the full posterior.
+
+# Simulation
+
+Simple test of DA-SMC framework using 2000 particles for linear regression.
+
+- Likelihood: Normal or t-distribution with artificial delay.
+- Surrogate model: Biased normal.
+- Proposal: Adaptive multivariate normal.
+- Surrogate tuning: Least-squares on $\log L$ with $T_{\boldsymbol{\eta}}$ univariate shift and scale.
+- Full to surrogate cost ratios: $L_{C} / \tilde{L}_{C} \in \{10^2,10^3,10^4,10^5\}$
+- Computation time optimisation: Approximation of ESJD and costs using pilot run over grid on proposal step-size.
+- ESJD Model, to estimate $k$ for diversification to be met; 
+    - Bootstrap using pilot run draws of ESJD, or
+    - Assume ESJD follows Gamma distribution estimated from pilot run.
+
+
+
+
+
+# Conclusion
+
+- Longest run time reduction 10 days to 1.5 days with approximate annealing and DA.
+- Mean squared error was near-identical for all methods.
+- Pilot median method works well for standard MH in SMC [@salomone2018unbiased].
+- Approximations to optimal computation time problem for *plain* MH correspond to choices used in the literature.
+
+```{r, include=FALSE}
+knitr::write_bib(c('knitr','rmarkdown','posterdown','pagedown'), 'packages.bib')
+```
+
+# References
+<div id="acknowledgements" class="references">
+Poster made with `posterdown` [@R-posterdown].
+</div>
